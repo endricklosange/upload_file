@@ -1,21 +1,28 @@
 <?php
 
+    
 if($_SERVER["REQUEST_METHOD"] === "POST"){
-    
     $errors = [];
+    $data = array_map('trim', $_POST);
+    
+    
     $uploadDir = 'public/uploads/';
-    $uploadFile = $uploadDir . basename($_FILES['avatar']['name']);
-    
-    $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+    $uploadFile = $uploadDir . uniqid() . basename($_FILES['imageUpload']['name']);
+    $extension = pathinfo($_FILES['imageUpload']['name'], PATHINFO_EXTENSION);
     $extensions_ok = ['jpg','jpeg','png','gif','webp'];
-    $maxFileSize = 1000000;
     
+    
+    $maxFileSize = 1000000;
 
     if( (!in_array($extension, $extensions_ok ))){
         $errors[] = 'Veuillez sélectionner une image de type Jpg, Jpeg, Png, gif, webp !';
     }
-    if( file_exists($_FILES['avatar']['tmp_name']) && filesize($_FILES['avatar']['tmp_name']) > $maxFileSize){
+    if( file_exists($_FILES['imageUpload']['tmp_name']) && filesize($_FILES['imageUpload']['tmp_name']) > $maxFileSize){
         $errors[] = "Votre fichier doit faire moins de 1Mo !";
+    }
+   if (empty($errors)){
+        move_uploaded_file($_FILES['imageUpload']['tmp_name'], $uploadFile);
+        echo 'HOMER SIMPSON 36 ans'; 
     }
 }
 ?>
@@ -31,24 +38,16 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
     <title>Document</title>
 </head>
 <body>
-    <?php if(empty($errors)): ?>
-        <?php move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadFile)?>
-        <?= 'HOMER SIMPSON' ?>
-        <?= '36 ans' ?>
-        <img src="<?= $uploadFile;?>" alt="homer" width="400px"/>
-    <?php else :?>
+    <?php if(!empty($errors)): ?>
         <?php foreach ($errors as $error): ?>
             <p> <?= $error ?></p>
         <?php endforeach ?>
-       
-        <?php header('Location: /index.php'); ?>
-}
-
-
-    <?php endif ?>
+    <?php else :?>
+        <img src="<?= $uploadFile;?>" alt="homer" width="400px"/>
+    <?php endif; ?>
     <form method="POST" enctype="multipart/form-data">
     <label for="imageUpload">Upload an profile image</label>    
-    <input type="file" name="avatar" id="imageUpload" />
+    <input type="file" name="imageUpload" id="imageUpload" />
     <button name="send">Send</button>
     
 </form>
